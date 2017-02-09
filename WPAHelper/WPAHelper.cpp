@@ -1,13 +1,13 @@
 /*--------------------------------------------------------------------------------------+
 //----------------------------------------------------------------------------
-// DOCUMENT ID:   
-// LIBRARY:       
+// DOCUMENT ID:
+// LIBRARY:
 // CREATOR:       Mark Anderson
 // DATE:          05-05-2016
 //
 // NAME:          WPAHelper
 //
-// DESCRIPTION:   
+// DESCRIPTION:
 //
 // REFERENCES:
 //
@@ -33,7 +33,7 @@
  * $Revision: $
  * $Modtime:  $
  * $History:  $
- * 
+ *
  +--------------------------------------------------------------------------------------*/
 //#define MDL
 //#define winNT
@@ -70,7 +70,7 @@ USING_NAMESPACE_BENTLEY
 USING_NAMESPACE_BENTLEY_USTN
 USING_NAMESPACE_BENTLEY_USTN_ELEMENT
 
-// If the dialog is DIALOGID_CommandStatus, then the completion bar is in the status bar; 
+// If the dialog is DIALOGID_CommandStatus, then the completion bar is in the status bar;
 //   otherwise, it is in its own dialog.
 
 Private DialogBox   *completionBarDbP=NULL;
@@ -86,7 +86,7 @@ static bool                 s_bSilent = true;
 extern "C" DLLEXPORT void openCompletionBarDialog(char *messageTextP)
 {
     completionBarDbP = NULL;
- 
+
     completionBarDbP = mdlDialog_completionBarOpen(messageTextP);
 }
 /*----------------------------------------------------------------------------------*//**
@@ -101,7 +101,7 @@ char *messageTextP              /* => text message to be displayed */
 
     if (messageTextP)
         mdlOutput_printf (MSG_ERROR, messageTextP);
-        
+
     if (NULL != (dbP = mdlDialog_find (DIALOGID_CommandStatus, NULL)))
         {
         CompletionBarInfo       data;
@@ -180,7 +180,7 @@ void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,DgnModelRefP de
     }
    // else
    //     s_copyFlag = false;
-    
+
 }
 
 void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
@@ -199,7 +199,7 @@ Inputq_element	*iqelP
    if(!s_bSilent)
        printf ("got an event of type %ld \n",iqelP->hdr.cmdtype);
 
-   
+
        // return INPUT_ACCEPT;
 
     //  Should verify that it is ones of the types we expect, etc.
@@ -250,7 +250,7 @@ bool IsIModelElementSelected()
         if(!s_bSilent)
             printf("found %d selected elements \n",numSelected);
         for (int i = numSelected-1;i>=0;i--)
-        { 
+        {
             DgnFileP pFile = mdlModelRef_getDgnFile(pModels[i]);
             if(pFile->IsIModel())
             {
@@ -264,6 +264,9 @@ bool IsIModelElementSelected()
 
     return rtStatus;
 }
+///
+//a simple command filter to echo out the commands that are run.
+///
 int PCKeyinMonitor_commandFilter
 (
  Inputq_element *iquelP
@@ -279,7 +282,7 @@ int PCKeyinMonitor_commandFilter
     if(!s_bSilent)
         printf ("CMDNUM %s 0x%08x %s class = %ld imm = %ld\n",
     iquelP->u.cmd.taskId, iquelP->u.cmd.command, cmdString, iquelP->u.cmd.commandClass,iquelP->u.cmd.immediate);
-    
+
    // if((strcmp("TRANSFRM",iquelP->u.cmd.taskId)== 0) && ((0x0e030000==iquelP->u.cmd.command)||(0x04070000==iquelP->u.cmd.command)))
    //     if(IsIModelElementSelected())
    //      status = INPUT_COMMAND_REJECT;
@@ -287,15 +290,20 @@ int PCKeyinMonitor_commandFilter
     //if(s_copyFlag)
     //    mdlClipboard_emptyClipboard();
 
-    s_copyFlag = false;  
+    s_copyFlag = false;
     return status;
     }
 ///
 //the callback class for the Agenda Events.
-//this is being used to block the entries 
+//this is being used to block the entries
 //if the elemnent is in an imodel it is removed.
 struct AEvents:IElementAgendaEvents
 {
+  //this will look at the agenda and allow the program
+  //to modify the contents.
+  //in this case the contents are checked to see if it
+  //is in an imodel.  if the eh is in an imodel then it
+  //is set as invalid.
     virtual bool DoModifyAgendaEntries(ElementAgendaP pAgenda,AgendaOperation opType,AgendaModify modify)
     {
        ElemAgendaEntry const* start = pAgenda->GetFirst ();
@@ -311,20 +319,23 @@ struct AEvents:IElementAgendaEvents
                 invalidatedElm = true;
                 }
             }
-        
+
         if ((!s_bSilent)&&(invalidatedElm))
             mdlOutput_messageCenter(MESSAGE_ERROR,"Attempting to Copy from IMODEL","one or more elements selected are in an i-model",TRUE);
 
         return true;
     }
+    //called before the modify happens.
     virtual void OnPreModifyAgenda(ElementAgendaCP agenda,AgendaOperation opType,AgendaModify modify,bool isGroupOp)
     {
         //printf("Pre modify event \n");
     }
+    //called after the element is modified.
     virtual void OnPostModifyAgenda(ElementAgendaCP agenda,AgendaOperation opType,AgendaModify modify,bool isGroupOp)
     {
         //printf("Post modify event \n");
     }
+    //called when the element is going to be copied to or from the clipboard.
     virtual void DoAddDeferredClipboardFormats(ElementAgendaP agenda,AgendaOperation opType,AgendaModify modify,GuiDataObject * dataP)
     {
         //printf("deferred clipboard formats ... \n");
