@@ -1,0 +1,115 @@
+#--------------------------------------------------------------------------------------
+#
+#     $Source: /miscdev-root/miscdev/vault/VisualStudioWizards/MDLProjectWizard/Templates/1033/root.mke,v $
+#
+#  $Copyright: (c) 2013 Bentley Systems, Incorporated. All rights reserved. $
+#
+#--------------------------------------------------------------------------------------
+appName		= WPAHelper
+sAppName	= WPAHelper
+
+baseDir         = $(_MakeFilePath)
+langSpec	= $(baseDir)english/
+
+winSDKFolder="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1a"
+
+%include mdl.mki
+
+dirToSearch = $(MSMDE)mdl/MicroStationAPI/
+%include cincapnd.mki
+
+#----------------------------------------------------------------------
+# Define macros for files included in our link and resource merge
+#----------------------------------------------------------------------
+appRscs         = $(o)$(appName).rsc \
+                  $(o)$(appName)msg.rsc \
+                  $(o)$(sAppName)cmd.rsc
+
+#----------------------------------------------------------------------
+# Create needed output directories if they don't exist
+#----------------------------------------------------------------------
+$(o)$(tstdir)			: $(o)$(tstdir)
+
+#-----------------------------------------------------------------------
+#	Define constants specific to this example
+#-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+#	Generate non-language resource files
+#-----------------------------------------------------------------------
+$(baseDir)$(appName)cmd.h       : $(baseDir)$(appName)cmd.r
+
+$(o)$(appName)cmd.rsc		: $(baseDir)$(appName)cmd.r
+
+$(o)$(appName).rsc              :$(baseDir)$(appName).r
+
+
+#-----------------------------------------------------------------------
+#	Generate language resource files
+#-----------------------------------------------------------------------
+$(o)$(appName)msg.rsc              :$(langSpec)$(appName)msg.r
+
+#-----------------------------------------------------------------------
+#  Build Native Code 
+#-----------------------------------------------------------------------
+dlmObjs = \
+$(o)$(appName)$(oext) 
+
+MSJ_SKIP_SIGNRSCS   = 1
+DLM_NO_MANIFEST = 1
+DLM_NAME            = $(appName)
+DLM_DEST            = $(mdlapps)
+DLM_SYM_NAME        = $(appName)sym
+DLM_RESL_NAME       = $(appName)res
+DLM_OBJECT_DEST     = $(o)
+DLM_LIBDEF_SRC      = $(baseDir)
+DLM_OBJECT_FILES    = $(dlmObjs)
+DLM_LIBRARY_FILES   = $(dlmLibs)
+DLM_NO_DLS          = 1		    # use DLLEXPORT instead
+DLM_NO_DEF          = 1
+DLM_NOENTRY         = 1
+DLM_NO_DELAYLOAD    = 1		
+DLM_LIBRARY_FILES 	=  \
+                $(mdlLibs)BentleyDGN.lib \
+                $(mdlLibs)toolsubs.lib \
+                $(mdlLibs)ditemlib.lib \
+                $(mdlLibs)mdllib.lib 
+
+#------------------------------------------------
+#	Compile the source files for the DLM
+#------------------------------------------------
+
+$(o)$(appName)$(oext)   : $(baseDir)$(appName).cpp
+
+%include dlmlink.mki
+
+#-----------------------------------------------------------------------
+#	Merge Objects into one file
+#-----------------------------------------------------------------------
+$(o)$(sAppName).mi        : $(appRscs)
+    $(msg)	
+    >$(o)make.opt
+    -o$@
+    $(appRscs)
+    <
+    $(RLibCmd) @$(o)make.opt
+    ~time
+
+#----------------------------------------------------------------------
+# complete construction of the .ma
+#----------------------------------------------------------------------
+# %include $(sAppName)rsc.mki
+#
+
+appRscs =   \
+         $(o)$(sAppName).mi
+
+$(mdlapps)$(appName).ma		: $(appRscs)
+    $(msg)
+    > $(o)make.opt
+    -o$@
+    $(appRscs)
+    <
+    $(RLibCmd) @$(o)make.opt
+    ~time
+
+
