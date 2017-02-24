@@ -29,10 +29,15 @@
 // ---------------------------------------------------------------------------
 /*
 /* CHANGE LOG
- * $Archive:  $
- * $Revision: $
- * $Modtime:  $
- * $History:  $
+ * $Archive: /MDL/BVSchemaChecker/WPHelper/WPAHelperCmd.r $
+ * $Revision: 1 $
+ * $Modtime: 2/24/17 9:03a $
+ * $History: WPAHelperCmd.r $
+ * 
+ * *****************  Version 1  *****************
+ * User: Mark.anderson Date: 2/24/17    Time: 9:31a
+ * Created in $/MDL/BVSchemaChecker/WPHelper
+ * Initial commit for the helper app
  * 
  +--------------------------------------------------------------------------------------*/
 /*----------------------------------------------------------------------+
