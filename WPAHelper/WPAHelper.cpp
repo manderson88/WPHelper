@@ -148,7 +148,7 @@ void
     mdlOutput_error ("");
     completionBarDbP = NULL;
     }
-
+#if defined (EXPERIMENTAL_CODE)
 int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,UInt32 filePos,MSElementDescrP newEdP, MSElementDescrP oldEdP, MSElementDescrP *replacementEdP)
 {
     if(!s_bSilent)
@@ -189,7 +189,9 @@ void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
     if(pFile->IsIModel())
         printf("ref to master copy \n");
 }
-
+#ENDIF
+/* input queue hook call back function only used for observation
+*/
 Private int ISpySomething
 (
 Inputq_element	*iqelP
@@ -233,6 +235,9 @@ Inputq_element	*iqelP
        // }
         return INPUT_ACCEPT;
     }
+/*
+A function to see if an element is selected and it is from a fence or imodel not used.
+*/
 bool IsIModelElementSelected()
 {
     bool rtStatus = false;
@@ -362,6 +367,7 @@ extern "C" DLLEXPORT int isIModel(DgnModelRefP pModel)
     else
         return 0;
 }
+
 /*---------------------------------------------------------------------------------**//**
 * @description  MdlMain
 * @param 	argc      The number of command line parameters sent to the application.
