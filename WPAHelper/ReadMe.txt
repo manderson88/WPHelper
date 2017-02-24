@@ -19,4 +19,9 @@ This is a sample template file.
 Other notes: This sample application code can be used as a template for development in 
 MicroStation.
 
+THIS Application needs to be built with VS2005 Only!  it uses an iterator
+that comes from a Bentley Library that we remove (or potentially remove ) 
+elements from.  This will cause a memory exception if not built with the same
+VC library as Bentley.
+
 /////////////////////////////////////////////////////////////////////////////

@@ -11,7 +11,8 @@ sAppName	= WPAHelper
 baseDir         = $(_MakeFilePath)
 langSpec	= $(baseDir)english/
 
-winSDKFolder="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1a"
+#needed for my install to build.
+#winSDKFolder="C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1a"
 
 %include mdl.mki
 

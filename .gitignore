@@ -3,3 +3,13 @@
 ################################################################################
 
 /.vs/WPAHelper/v15/ipch/AutoPCH/WPAHELPER-3721d79e/WPAHELPER-55edb955/WPAHELPER.ipch
+/.vs/WPAHelper/v15/ipch/AutoPCH/WPAHELPER-3721d79e/WPAHELPERTEXT-7541bdc5/WPAHELPERTEXT.ipch
+*.suo
+*.db
+*.opendb
+*.ipch
+*.suo
+*.db
+/.vs/ProjectSettings.json
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
