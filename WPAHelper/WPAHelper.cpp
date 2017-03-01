@@ -86,7 +86,7 @@ const int                   dataPointMask = 1 << (2 - 1);
 const int                   resetMask = 1 << (3 - 1);
 const int                   keyinMask = 1 << (4 - 1);
 const int                   unassignedCBMask = 1 << (6 - 1);
-static bool                 s_bSilent = true;
+static bool                 s_bSilent = false;
 
 extern "C" DLLEXPORT void openCompletionBarDialog(char *messageTextP)
 {
@@ -153,7 +153,7 @@ void
     mdlOutput_error ("");
     completionBarDbP = NULL;
     }
-#if defined (EXPERIMENTAL_CODE)
+
 int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,UInt32 filePos,MSElementDescrP newEdP, MSElementDescrP oldEdP, MSElementDescrP *replacementEdP)
 {
     if(!s_bSilent)
@@ -194,7 +194,7 @@ void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
     if(pFile->IsIModel())
         printf("ref to master copy \n");
 }
-#ENDIF
+
 /* input queue hook call back function only used for observation
 */
 Private int ISpySomething
@@ -356,9 +356,9 @@ static AEvents agendaListener;
 extern "C" DLLEXPORT void addWriteToFileHook(int iSilent)
 {
     s_bSilent = (iSilent==0);
-    //mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
-    //mdlSystem_setFunction (SYSTEM_ELMDSCR_COPY,elmdscrCopyHook);
-    //mdlSystem_setFunction (SYSTEM_ELM_REF_TO_MASTER,refToMaster);
+    mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
+    mdlSystem_setFunction (SYSTEM_ELMDSCR_COPY,elmdscrCopyHook);
+    mdlSystem_setFunction (SYSTEM_ELM_REF_TO_MASTER,refToMaster);
     mdlInput_setMonitorFunction (MONITOR_ALL,ISpySomething);
     mdlInput_setFunction (INPUT_COMMAND_FILTER,PCKeyinMonitor_commandFilter);
     Bentley::Ustn::Element::ElementAgenda::AddListener(&agendaListener);
@@ -391,3 +391,4 @@ char        *argv[]
 
     return SUCCESS;
     }
+
