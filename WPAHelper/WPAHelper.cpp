@@ -77,7 +77,6 @@ USING_NAMESPACE_BENTLEY_USTN_ELEMENT
 
 // If the dialog is DIALOGID_CommandStatus, then the completion bar is in the status bar;
 //   otherwise, it is in its own dialog.
-
 Private DialogBox   *completionBarDbP=NULL;
 
 Private BoolInt s_copyFlag=FALSE; //false will mean copy ok
