@@ -79,6 +79,7 @@ USING_NAMESPACE_BENTLEY_USTN_ELEMENT
 //   otherwise, it is in its own dialog.
 
 Private DialogBox   *completionBarDbP=NULL;
+
 Private BoolInt s_copyFlag=FALSE; //false will mean copy ok
 static unsigned short		allowedMessages;
 const int                   commandMask = 1 << (1 - 1);
@@ -86,17 +87,20 @@ const int                   dataPointMask = 1 << (2 - 1);
 const int                   resetMask = 1 << (3 - 1);
 const int                   keyinMask = 1 << (4 - 1);
 const int                   unassignedCBMask = 1 << (6 - 1);
-static bool                 s_bSilent = false;
 
+static bool                 s_bSilent = false;
+/*---------------------------------------------------------------------------+
+|  opens the completion bar in a dialog box                                  |
++----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT void openCompletionBarDialog(char *messageTextP)
 {
     completionBarDbP = NULL;
 
     completionBarDbP = mdlDialog_completionBarOpen(messageTextP);
 }
-/*----------------------------------------------------------------------------------*//**
- @bsimethod
-+---------------+---------------+---------------+---------------+---------------+------*/
+/*----------------------------------------------------------------------------+
+| opens the completion bar in the status area of host product.                |
++---------------+---------------+---------------+---------------+-----+------*/
 extern "C" DLLEXPORT void     openCompletionBar
 (
 char *messageTextP              /* => text message to be displayed */
@@ -121,9 +125,9 @@ char *messageTextP              /* => text message to be displayed */
     mdlDialog_completionBarUpdate (completionBarDbP, NULL,  0);
     }
 
-/*----------------------------------------------------------------------------------*//**
- @bsimethod
-+---------------+---------------+---------------+---------------+---------------+------*/
+/*----------------------------------------------------------------------------+
+| updates the completion bar with a percentage and message.                   |
++---------------+---------------+---------------+---------------+-------------*/
 extern "C" DLLEXPORT  void     updateCompletionBar
 (
 char           *messageText,       /* => Message text */
@@ -136,9 +140,9 @@ int             percentComplete    /* => % complete on bar */
     mdlDialog_completionBarUpdate (completionBarDbP, messageText,  percentComplete);
     }
 
-/*----------------------------------------------------------------------------------*//**
- @bsimethod
-+---------------+---------------+---------------+---------------+---------------+------*/
+/*----------------------------------------------------------------------------+
+| closes the completion bar.                                                  |
++---------------+---------------+---------------+---------------+-------------*/
 extern "C" DLLEXPORT void     closeCompletionBar
 (
 void
@@ -153,8 +157,13 @@ void
     mdlOutput_error ("");
     completionBarDbP = NULL;
     }
-
-int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,UInt32 filePos,MSElementDescrP newEdP, MSElementDescrP oldEdP, MSElementDescrP *replacementEdP)
+/*----------------------------------------------------------------------------+
+|  dscrToFileHook - this is the element descriptor write to file hook         |
+| implementation.  NOT USED                                                   |
++-----------------------------------------------------------------------------*/
+int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,
+                   UInt32 filePos,MSElementDescrP newEdP, 
+                   MSElementDescrP oldEdP, MSElementDescrP *replacementEdP)
 {
     if(!s_bSilent)
         printf("the write to file hook native \n");
@@ -165,9 +174,11 @@ int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,UInt32 file
     else
         return ELMDTF_STATUS_SUCCESS;
 }
-
-
-void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,DgnModelRefP destModelP, BoolInt preCopy)
+/*----------------------------------------------------------------------------+
+|  elmdscrCopyHook - this is the element descriptor copy callback.  NOT USED  |
++-----------------------------------------------------------------------------*/
+void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,
+                     DgnModelRefP destModelP, BoolInt preCopy)
 {
     if(!s_bSilent)
         printf ("the copy hook \t");
@@ -179,7 +190,8 @@ void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,DgnModelRefP de
     if(pFile->IsIModel())
     {
         if(s_copyFlag==FALSE)
-            mdlOutput_messageCenter(MESSAGE_ERROR,"Attempting to Copy from IMODEL","one or more elements selected are in an i-model",TRUE);
+            mdlOutput_messageCenter(MESSAGE_ERROR,
+                "Attempting to Copy from IMODEL","one or more elements selected are in an i-model",TRUE);
 
         s_copyFlag = true;
     }
@@ -187,7 +199,10 @@ void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,DgnModelRefP de
    //     s_copyFlag = false;
 
 }
-
+/*----------------------------------------------------------------------------+
+| refToMaster - the element descriptor is being processed from a reference    |
+| model.  NOT USED.                                                           |
++-----------------------------------------------------------------------------*/
 void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
 {
     DgnFileP pFile = mdlModelRef_getDgnFile(pModel);
@@ -195,8 +210,9 @@ void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
         printf("ref to master copy \n");
 }
 
-/* input queue hook call back function only used for observation
-*/
+/*----------------------------------------------------------------------------+ 
+|  input queue hook call back function only used for observation              |
++-----------------------------------------------------------------------------*/
 Private int ISpySomething
 (
 Inputq_element	*iqelP
@@ -240,9 +256,10 @@ Inputq_element	*iqelP
        // }
         return INPUT_ACCEPT;
     }
-/*
-A function to see if an element is selected and it is from a fence or imodel not used.
-*/
+/*----------------------------------------------------------------------------+
+| IsIModelSelected - A function to see if an element is selected and it is    |
+| from a fence or imodel not used.                                            |
++-----------------------------------------------------------------------------*/
 bool IsIModelElementSelected()
 {
     bool rtStatus = false;
@@ -274,9 +291,9 @@ bool IsIModelElementSelected()
 
     return rtStatus;
 }
-///
-//a simple command filter to echo out the commands that are run.
-///
+/*----------------------------------------------------------------------------+
+|a simple command filter to echo out the commands that are run.               |
++-----------------------------------------------------------------------------*/
 int PCKeyinMonitor_commandFilter
 (
  Inputq_element *iquelP
@@ -303,10 +320,11 @@ int PCKeyinMonitor_commandFilter
     s_copyFlag = false;
     return status;
     }
-///
-//the callback class for the Agenda Events.
-//this is being used to block the entries
-//if the elemnent is in an imodel it is removed.
+/*----------------------------------------------------------------------------+
+|  the callback class for the Agenda Events.
+|  this is being used to block the entries
+|  if the elemnent is in an imodel it is removed.
++----------------------------------------------------------------------------*/
 struct AEvents:IElementAgendaEvents
 {
   //this will look at the agenda and allow the program
@@ -351,19 +369,31 @@ struct AEvents:IElementAgendaEvents
         //printf("deferred clipboard formats ... \n");
     }
 };
+/*----------------------------------------------------------------------------+
+| the static reference to the agenda listener implemented in this application.|
+|                                                                             |
++-----------------------------------------------------------------------------*/
 static AEvents agendaListener;
-
+/*----------------------------------------------------------------------------+
+| addWriteToFileHook - sets the callback(s) for protecting the write to file  |
+| the only one in operation is ElementAgenda.  Because of this the dll needs  |
+| to be compiled with VS2005.  Pass 1 to add messages to the output window.   |
++-----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT void addWriteToFileHook(int iSilent)
 {
     s_bSilent = (iSilent==0);
-    mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
+   /* mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
     mdlSystem_setFunction (SYSTEM_ELMDSCR_COPY,elmdscrCopyHook);
     mdlSystem_setFunction (SYSTEM_ELM_REF_TO_MASTER,refToMaster);
     mdlInput_setMonitorFunction (MONITOR_ALL,ISpySomething);
-    mdlInput_setFunction (INPUT_COMMAND_FILTER,PCKeyinMonitor_commandFilter);
+    mdlInput_setFunction (INPUT_COMMAND_FILTER,PCKeyinMonitor_commandFilter);*/
     Bentley::Ustn::Element::ElementAgenda::AddListener(&agendaListener);
 }
-
+/*----------------------------------------------------------------------------+
+| isIModel - wrapper for the native function so it can be called from C#      |
+| Returns true if the model is an i-model.                                    |
+|                                                                             |
++----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT int isIModel(DgnModelRefP pModel)
 {
     DgnFileP pFile = mdlModelRef_getDgnFile((DgnModelRefP)pModel);
