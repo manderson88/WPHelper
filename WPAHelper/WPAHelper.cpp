@@ -77,8 +77,8 @@ USING_NAMESPACE_BENTLEY_USTN_ELEMENT
 
 // If the dialog is DIALOGID_CommandStatus, then the completion bar is in the status bar;
 //   otherwise, it is in its own dialog.
-
 Private DialogBox   *completionBarDbP=NULL;
+
 Private BoolInt s_copyFlag=FALSE; //false will mean copy ok
 static unsigned short		allowedMessages;
 const int                   commandMask = 1 << (1 - 1);
@@ -88,6 +88,10 @@ const int                   keyinMask = 1 << (4 - 1);
 const int                   unassignedCBMask = 1 << (6 - 1);
 static bool                 s_bSilent = false;
 
+/*
+openCompletionBarDialog this method opens the completion bar in a dialog box.
+
+*/
 extern "C" DLLEXPORT void openCompletionBarDialog(char *messageTextP)
 {
     completionBarDbP = NULL;
@@ -95,7 +99,8 @@ extern "C" DLLEXPORT void openCompletionBarDialog(char *messageTextP)
     completionBarDbP = mdlDialog_completionBarOpen(messageTextP);
 }
 /*----------------------------------------------------------------------------------*//**
- @bsimethod
+ @bsimethod openCompletionBar this method opens the completion bar dialog with
+ a messge to display.
 +---------------+---------------+---------------+---------------+---------------+------*/
 extern "C" DLLEXPORT void     openCompletionBar
 (
@@ -122,7 +127,8 @@ char *messageTextP              /* => text message to be displayed */
     }
 
 /*----------------------------------------------------------------------------------*//**
- @bsimethod
+ @bsimethod updateCompletionBar this method is called when the completion bar needs 
+ to be updated with the currrent progress message.
 +---------------+---------------+---------------+---------------+---------------+------*/
 extern "C" DLLEXPORT  void     updateCompletionBar
 (
@@ -137,7 +143,9 @@ int             percentComplete    /* => % complete on bar */
     }
 
 /*----------------------------------------------------------------------------------*//**
- @bsimethod
+ @bsimethod closeCompletionBar - this is called when an application needs to close the
+ completion bar.
+
 +---------------+---------------+---------------+---------------+---------------+------*/
 extern "C" DLLEXPORT void     closeCompletionBar
 (
@@ -153,7 +161,9 @@ void
     mdlOutput_error ("");
     completionBarDbP = NULL;
     }
-
+/*
+The element descripto being written to file hook function
+*/
 int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,UInt32 filePos,MSElementDescrP newEdP, MSElementDescrP oldEdP, MSElementDescrP *replacementEdP)
 {
     if(!s_bSilent)
@@ -166,7 +176,9 @@ int dscrToFileHook(ElmDscrToFile_Actions action, DgnModelRefP pModel,UInt32 file
         return ELMDTF_STATUS_SUCCESS;
 }
 
-
+/*
+The element descripto being copied hook function
+*/
 void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,DgnModelRefP destModelP, BoolInt preCopy)
 {
     if(!s_bSilent)
@@ -187,7 +199,9 @@ void elmdscrCopyHook(MSElementDescrH edPP, DgnModelRefP pOrModel,DgnModelRefP de
    //     s_copyFlag = false;
 
 }
-
+/*
+The reference to master file callback function
+*/
 void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
 {
     DgnFileP pFile = mdlModelRef_getDgnFile(pModel);
@@ -195,7 +209,8 @@ void refToMaster(MSElementDescrH edPP, DgnModelRefP pModel)
         printf("ref to master copy \n");
 }
 
-/* input queue hook call back function only used for observation
+/* 
+input queue hook call back function only used for observation
 */
 Private int ISpySomething
 (
@@ -319,6 +334,7 @@ struct AEvents:IElementAgendaEvents
        ElemAgendaEntry const* start = pAgenda->GetFirst ();
        ElemAgendaEntry const* end = start + pAgenda->GetCount ();
        bool invalidatedElm = false;
+
         for (ElemAgendaEntry const* curr = start; curr < end ; curr++)
             {
             DgnFileP pFile = curr->GetDgnFile();
@@ -351,19 +367,38 @@ struct AEvents:IElementAgendaEvents
         //printf("deferred clipboard formats ... \n");
     }
 };
+///the static instance of the agenda listener interface.
 static AEvents agendaListener;
-
+/*----------------------------------------------------------------------------+
+| addWriteToFileHook is implemented to add a callback on the write to file 
+| operations.  For the current implementation only the Agenda callback is used.
++-----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT void addWriteToFileHook(int iSilent)
 {
     s_bSilent = (iSilent==0);
-    mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
+#if defined (ALLCALLBACKS)    
+	mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
     mdlSystem_setFunction (SYSTEM_ELMDSCR_COPY,elmdscrCopyHook);
     mdlSystem_setFunction (SYSTEM_ELM_REF_TO_MASTER,refToMaster);
     mdlInput_setMonitorFunction (MONITOR_ALL,ISpySomething);
     mdlInput_setFunction (INPUT_COMMAND_FILTER,PCKeyinMonitor_commandFilter);
+#endif
     Bentley::Ustn::Element::ElementAgenda::AddListener(&agendaListener);
 }
-
+/*-----------------------------------------------------------------------------+
+|  removeWriteToFileHook - drops the write to file hook.                       |
++-----------------------------------------------------------------------------*/
+extern "C" DLLEXPORT void removeWriteToFileHook()
+{
+	Bentley::Ustn::Element::ElementAgenda::DropListener(&agendaListener);
+}
+/*----------------------------------------------------------------------------+
+|  isModel function to check to see if the model reference is an i-model.  This
+| function was created to fill a void in the COM model.  It uses the 
+| MicroStatationAPI method on the DgnFileObj for detecting that the file is an
+| i-model.
+|
++----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT int isIModel(DgnModelRefP pModel)
 {
     DgnFileP pFile = mdlModelRef_getDgnFile((DgnModelRefP)pModel);
