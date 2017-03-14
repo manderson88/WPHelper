@@ -30,9 +30,14 @@
 /*
 /* CHANGE LOG
  * $Archive: /MDL/BVSchemaChecker/WPHelper/WPAHelper.cpp $
- * $Revision: 1 $
- * $Modtime: 2/24/17 9:03a $
+ * $Revision: 2 $
+ * $Modtime: 3/02/17 10:22a $
  * $History: WPAHelper.cpp $
+ * 
+ * *****************  Version 2  *****************
+ * User: Mark.anderson Date: 3/06/17    Time: 12:23p
+ * Updated in $/MDL/BVSchemaChecker/WPHelper
+ * clean up comments
  * 
  * *****************  Version 1  *****************
  * User: Mark.anderson Date: 2/24/17    Time: 9:30a
