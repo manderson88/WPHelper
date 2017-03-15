@@ -382,7 +382,7 @@ extern "C" DLLEXPORT void addWriteToFileHook(int iSilent)
 {
     s_bSilent = (iSilent==0);
 #if defined (ALLCALLBACKS)    
-	mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
+    mdlSystem_setFunction (SYSTEM_ELMDSCR_TO_FILE,dscrToFileHook);
     mdlSystem_setFunction (SYSTEM_ELMDSCR_COPY,elmdscrCopyHook);
     mdlSystem_setFunction (SYSTEM_ELM_REF_TO_MASTER,refToMaster);
     mdlInput_setMonitorFunction (MONITOR_ALL,ISpySomething);
@@ -395,7 +395,7 @@ extern "C" DLLEXPORT void addWriteToFileHook(int iSilent)
 +-----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT void removeWriteToFileHook()
 {
-	Bentley::Ustn::Element::ElementAgenda::DropListener(&agendaListener);
+    Bentley::Ustn::Element::ElementAgenda::DropListener(&agendaListener);
 }
 /*----------------------------------------------------------------------------+
 |  isModel function to check to see if the model reference is an i-model.  This
@@ -406,31 +406,31 @@ extern "C" DLLEXPORT void removeWriteToFileHook()
 +----------------------------------------------------------------------------*/
 extern "C" DLLEXPORT int isIModel(int pModel)
 {
-	BoolInt bStatus = mdlModelRef_isReference((DgnModelRefP)pModel);
+    BoolInt bStatus = mdlModelRef_isReference((DgnModelRefP)pModel);
 
     DgnFileP pFile = mdlModelRef_getDgnFile((DgnModelRefP)pModel);
-	
-	if(pFile != NULL)
-		if(pFile->IsIModel())
-			return 1;
-		else
-			return 0;
-	//if we get a null then try the file name way?
-	if (pFile == NULL)
-	{
-		char fileName[MAXFILELENGTH];
-		StatusInt status = mdlModelRef_getFileName((DgnModelRefP)pModel, fileName, MAXFILELENGTH);
-		if (SUCCESS == status)
-		{
-			Bentley::WString wstrName(fileName);
-			int pos = wstrName.find_last_of(L".i.dgn");
-			if (pos == Bentley::WString::npos)
-				return 1;
-			else
-				return 0;
-		}
-	}
-	return -1;
+    
+    if(pFile != NULL)
+        if(pFile->IsIModel())
+            return 1;
+        else
+            return 0;
+    //if we get a null then try the file name way?
+    if (pFile == NULL)
+    {
+        char fileName[MAXFILELENGTH];
+        StatusInt status = mdlModelRef_getFileName((DgnModelRefP)pModel, fileName, MAXFILELENGTH);
+        if (SUCCESS == status)
+        {
+            Bentley::WString wstrName(fileName);
+            int pos = wstrName.find_last_of(L".i.dgn");
+            if (pos == Bentley::WString::npos)
+                return 1;
+            else
+                return 0;
+        }
+    }
+    return -1;
 }
 
 /*---------------------------------------------------------------------------------**//**
