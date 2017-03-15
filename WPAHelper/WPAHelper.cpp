@@ -404,13 +404,33 @@ extern "C" DLLEXPORT void removeWriteToFileHook()
 | i-model.
 |
 +----------------------------------------------------------------------------*/
-extern "C" DLLEXPORT int isIModel(DgnModelRefP pModel)
+extern "C" DLLEXPORT int isIModel(int pModel)
 {
+	BoolInt bStatus = mdlModelRef_isReference((DgnModelRefP)pModel);
+
     DgnFileP pFile = mdlModelRef_getDgnFile((DgnModelRefP)pModel);
-    if(pFile->IsIModel())
-        return 1;
-    else
-        return 0;
+	
+	if(pFile != NULL)
+		if(pFile->IsIModel())
+			return 1;
+		else
+			return 0;
+	//if we get a null then try the file name way?
+	if (pFile == NULL)
+	{
+		char fileName[MAXFILELENGTH];
+		StatusInt status = mdlModelRef_getFileName((DgnModelRefP)pModel, fileName, MAXFILELENGTH);
+		if (SUCCESS == status)
+		{
+			Bentley::WString wstrName(fileName);
+			int pos = wstrName.find_last_of(L".idgn");
+			if (pos == Bentley::WString::npos)
+				return 1;
+			else
+				return 0;
+		}
+	}
+	return -1;
 }
 
 /*---------------------------------------------------------------------------------**//**
