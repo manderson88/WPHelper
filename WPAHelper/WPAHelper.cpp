@@ -423,7 +423,7 @@ extern "C" DLLEXPORT int isIModel(int pModel)
 		if (SUCCESS == status)
 		{
 			Bentley::WString wstrName(fileName);
-			int pos = wstrName.find_last_of(L".idgn");
+			int pos = wstrName.find_last_of(L".i.dgn");
 			if (pos == Bentley::WString::npos)
 				return 1;
 			else
